@@ -25,3 +25,7 @@ Este proyecto se basa en una pagina web de un equipo de futbol. Esta pagina esta
 "/nuevoslogros/"
 - cuenta con url para buscar logros conseguidos por el equipo.
 "/buscarlogro/"
+
+panel de administracion
+user: coder
+password: coder1234
