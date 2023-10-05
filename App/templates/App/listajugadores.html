@@ -1,0 +1,13 @@
+{% extends "App/padre.html" %}
+
+{% load static %}
+
+{% block section1 %}
+
+{% for jugador in jugadores %}
+<p>Nombre: {{ jugador.nombre }}</p>
+<p>Apellido: {{ jugador.apellido }}</p>
+<p>Numero: {{ jugador.numero }}</p>
+
+{% endfor %}
+{% endblock %}
