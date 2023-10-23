@@ -1,114 +1,110 @@
 from django.shortcuts import render
-from App.models import Jugador, Entrenador, Logro
-from App.forms import JugadorFormulario, BuscarJugadorForm, EntrenadorFormulario, BuscarEntrenadorForm, LogroFormulario, BuscarLogroForm
+from App.models import Blog, Avatar
+from App.forms import UserRegisterForm, UserEditForm
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, authenticate
+from django.views.generic import ListView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.detail import DetailView
+from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 def inicio(request):
-	return render(request, "App/inicio.html")
-def jugadores(request):
-      lista_jugadores = Jugador.objects.all()
-      return render(request, "App/jugadores.html", {"jugadores": lista_jugadores})
-def entrenadores(request):
-      lista_entrenadores = Entrenador.objects.all()
-      return render(request, "App/entrenadores.html", {"entrenadores": lista_entrenadores})
-def logros(request):
-      lista_logros = Logro.objects.all()
-      return render(request, "App/logros.html", {"logros": lista_logros})
-
-def nuevosjugadores(request):
- 
-      if request.method == "POST":
- 
-            miFormulario = JugadorFormulario(request.POST)
-            print(miFormulario)
- 
-            if miFormulario.is_valid():
-                  informacion = miFormulario.cleaned_data
-                  jugador = Jugador (nombre=informacion["nombre"], apellido=informacion["apellido"], numero=informacion["numero"])
-                  jugador.save()
-                  return render(request, "App/inicio.html")
-      else:
-            miFormulario = JugadorFormulario()
- 
-      return render(request, "App/nuevosjugadores.html", {"miFormulario": miFormulario})
-def buscarjugador(request):
-      if request.method == "POST":
- 
-            miFormulario = BuscarJugadorForm(request.POST)
-            print(miFormulario)
- 
-            if miFormulario.is_valid():
-                  informacion = miFormulario.cleaned_data
-                  jugadores = Jugador.objects.filter(apellido__icontains=informacion["apellido"])
-             
-                  return render(request, "App/listajugadores.html", {"jugadores": jugadores})
-      else:
-            miFormulario = BuscarJugadorForm()
- 
-      return render(request, "App/filtrojugadores.html", {"miFormulario": miFormulario})
+      return render(request, "App/inicio.html")
 
 
-def nuevosentrenadores(request):
- 
+class BlogList(LoginRequiredMixin, ListView):
+      model = Blog
+      template_name = "App/blogs_list.html"
+class BlogDetalle(DetailView):
+      model = Blog
+      template_name = "App/blogs_detalle.html"
+class BlogCreacion(LoginRequiredMixin, CreateView):
+      model = Blog
+      template_name = "App/blogs_create.html"
+      success_url = reverse_lazy("List")
+      fields = ['titulo', 'subtitulo', 'cuerpo', 'autor', 'fecha', 'imagen']
+class BlogUpdate(UpdateView):
+      model = Blog
+      template_name = "App/blogs_edit.html"
+      success_url = reverse_lazy("List")
+      fields = ['titulo', 'subtitulo', 'cuerpo', 'autor', 'fecha', 'imagen']
+class BlogDelete(DeleteView):
+      model = Blog
+      template_name = "App/blogs_delete.html"
+      success_url = reverse_lazy("List")
+
+def login_request(request):
       if request.method == "POST":
- 
-            miFormulario = EntrenadorFormulario(request.POST)
-            print(miFormulario)
- 
-            if miFormulario.is_valid():
-                  informacion = miFormulario.cleaned_data
-                  entrenador = Entrenador (nombre=informacion["nombre"], apellido=informacion["apellido"], edad=informacion["edad"])
-                  entrenador.save()
-                  return render(request, "App/inicio.html")
+            form = AuthenticationForm(request, data = request.POST)
+
+            if form.is_valid():
+                  usuario = form.cleaned_data.get('username')
+                  contra = form.cleaned_data.get('password')
+
+                  user = authenticate(username=usuario, password=contra)
+
+                  if user is not None:
+                        login(request, user)
+                       
+                        return render(request,"App/inicio.html",  {"mensaje":f"Bienvenido {usuario}"} )
+
+            else:
+                        
+                        return render(request,"App/inicio.html" ,  {"mensaje":"Error, datos incorrectos"})
+
+      form = AuthenticationForm()
+
+      return render(request,"App/login.html", {'form':form} )
+
+def register(request):
+
+      if request.method == 'POST':
+
+            form = UserRegisterForm(request.POST)
+            if form.is_valid():
+
+                  username = form.cleaned_data['username']
+                  form.save()
+                  return render(request,"App/inicio.html" ,  {"mensaje":"Usuario Creado"})
+            else:
+                  return render(request,"App/inicio.html" ,  {"mensaje":"no cumple requisitos"})
       else:
-            miFormulario = EntrenadorFormulario()
- 
-      return render(request, "App/nuevosentrenadores.html", {"miFormulario": miFormulario})
-def buscarentrenador(request):
-      if request.method == "POST":
- 
-            miFormulario = BuscarEntrenadorForm(request.POST)
-            print(miFormulario)
- 
-            if miFormulario.is_valid():
-                  informacion = miFormulario.cleaned_data
-                  entrenadores= Entrenador.objects.filter(apellido__icontains=informacion["apellido"])
-             
-                  return render(request, "App/listaentrenadores.html", {"entrenadores": entrenadores})
-      else:
-            miFormulario = BuscarEntrenadorForm()
- 
-      return render(request, "App/filtroentrenadores.html", {"miFormulario": miFormulario})
+            form = UserRegisterForm()            
+
+      return render(request,"App/register.html" ,  {"form":form})
+
+@login_required
+def useredit(request):
+
+    usuario = request.user
+
+    if request.method == 'POST':
+
+        miFormulario = UserEditForm(request.POST)
+
+        if miFormulario.is_valid():
+
+            informacion = miFormulario.cleaned_data
+
+            usuario.email = informacion['email']
+            usuario.password1 = informacion['password1']
+            usuario.password2 = informacion['password2']
+            usuario.username = informacion['username']
+
+            usuario.save()
+
+            return render(request, "App/inicio.html")
+
+    else:
+
+        miFormulario = UserEditForm(initial={'email': usuario.email})
+
+    return render(request, "App/useredit.html", {"form": miFormulario, "usuario": usuario})
 
 
-def nuevoslogros(request):
- 
-      if request.method == "POST":
- 
-            miFormulario = LogroFormulario(request.POST)
-            print(miFormulario)
- 
-            if miFormulario.is_valid():
-                  informacion = miFormulario.cleaned_data
-                  logro = Logro (nombre=informacion["nombre"], ano=informacion["ano"])
-                  logro.save()
-                  return render(request, "App/inicio.html")
-      else:
-            miFormulario = LogroFormulario()
- 
-      return render(request, "App/nuevoslogros.html", {"miFormulario": miFormulario})
-def buscarlogro(request):
-      if request.method == "POST":
- 
-            miFormulario = BuscarLogroForm(request.POST)
-            print(miFormulario)
- 
-            if miFormulario.is_valid():
-                  informacion = miFormulario.cleaned_data
-                  logros = Logro.objects.filter(nombre__icontains=informacion["nombre"])
-             
-                  return render(request, "App/listalogros.html", {"logros": logros})
-      else:
-            miFormulario = BuscarLogroForm()
- 
-      return render(request, "App/filtrologros.html", {"miFormulario": miFormulario})
+
+
 
 # Create your views here.

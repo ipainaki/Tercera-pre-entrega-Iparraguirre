@@ -1,0 +1,18 @@
+{% extends "App/padre.html" %}
+
+{% load static %}
+{% block title %}Blogs{% endblock %}
+{% block section1 %}
+
+<form method="POST">
+    {% csrf_token %}
+    Quieres eliminar el Blog: {{ blog.titulo }}?
+    <input type="submit" value="Eliminar">
+<p>
+        <a href="{% url 'List' %}">Volver</a>
+</p>
+
+</form>
+
+
+{% endblock %}

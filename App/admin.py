@@ -1,7 +1,6 @@
 from django.contrib import admin
-from .models import Jugador, Entrenador, Logro
+from .models import Blog, Avatar
 
-admin.site.register(Jugador)
-admin.site.register(Entrenador)
-admin.site.register(Logro)
+admin.site.register(Blog)
+admin.site.register(Avatar)
 # Register your models here.

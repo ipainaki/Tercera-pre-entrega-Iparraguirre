@@ -1,15 +1,18 @@
 from django.urls import path
-from .views import inicio, jugadores, entrenadores, logros, nuevosjugadores, buscarjugador, nuevosentrenadores, buscarentrenador, nuevoslogros, buscarlogro  
+from .views import inicio, BlogList, BlogDetalle, BlogCreacion, BlogUpdate, BlogDelete, login_request, register, useredit
+from django.contrib.auth.views import LogoutView
+
 
 urlpatterns = [
     path('', inicio, name="Inicio"),
-    path("jugadores/", jugadores, name="Jugadores"),
-    path("entrenadores/", entrenadores, name="Entrenadores"),
-    path("logros/", logros, name="Logros"),
-    path("nuevosjugadores/", nuevosjugadores, name="NuevosJugadores"),
-    path("buscarjugador/", buscarjugador, name="BuscarJugador"),
-    path("nuevosentrenadores/", nuevosentrenadores, name="NuevosEntrenadores"),
-    path("buscarentrenador/", buscarentrenador, name="BuscarEntrenador"),
-    path("nuevoslogros/", nuevoslogros, name="NuevosLogros"),
-    path("buscarlogro/", buscarlogro, name="BuscarLogro")
+    path("blogs/list/", BlogList.as_view(), name="List"),
+    path("blogs/detalle/<int:pk>/", BlogDetalle.as_view(), name="Detail"),
+    path("blogs/nuevo/", BlogCreacion.as_view(), name="New"),
+    path("blogs/editar/<int:pk>/", BlogUpdate.as_view(), name="Edit"),
+    path("blogs/eliminar/<int:pk>/", BlogDelete.as_view(), name="Delete"),
+    path("login/", login_request, name="Login"),
+    path('register/', register, name='Register'),
+    path('logout/', LogoutView.as_view(template_name='App/logout.html'), name='Logout'),
+    path('useredit/', useredit, name="Useredit")
+
 ]
