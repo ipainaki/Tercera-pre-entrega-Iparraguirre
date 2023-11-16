@@ -1,0 +1,17 @@
+{% extends "App/padre.html" %}
+
+{% load static %}
+{% block title %}Blogs{% endblock %}
+{% block section1 %}
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+    <button type="submit">Editar usuario</button>
+
+</form>
+
+
+{% endblock %}
